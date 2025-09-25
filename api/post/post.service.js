@@ -17,6 +17,7 @@ export const postService = {
   toggleLike,
   addComment,
   deleteComment,
+  massLike,
 }
 
 async function query(
@@ -55,18 +56,16 @@ async function query(
       )
       .toArray()
 
-    const byId = Object.fromEntries(users.map(u => [String(u._id), u]))
+    const byId = Object.fromEntries(users.map((u) => [String(u._id), u]))
 
-    const hydrated = posts.map(p => ({
+    const hydrated = posts.map((p) => ({
       ...p,
       author: byId[String(p.userId)] || null,
-      comments: (p.comments || []).map(c => ({
+      comments: (p.comments || []).map((c) => ({
         ...c,
         author: byId[String(c.userId)] || null,
       })),
-      likeUsers: (p.likeBy || [])
-        .map(id => byId[String(id)])
-        .filter(Boolean),
+      likeUsers: (p.likeBy || []).map((id) => byId[String(id)]).filter(Boolean),
     }))
 
     return hydrated
@@ -242,4 +241,17 @@ async function deleteComment(postComment, dbCollection) {
     logger.error(`cannot delete comment from postId ${postComment._id}`, err)
     throw err
   }
+}
+
+async function massLike(postId, user) {
+  const collection = await dbService.getCollection('posts')
+  const _id = ObjectId.createFromHexString(postId)
+
+  const addToSetObj = { $addToSet: { likeBy: user } }
+
+  const res = await collection.findOneAndUpdate({ _id }, addToSetObj, {
+    returnDocument: 'after',
+  })
+
+  return res.value
 }

@@ -4,14 +4,15 @@ import { requireAuth } from '../../middlewares/requireAuth.middleware.js'
 // import { postService } from "./post.service.js"
 // import { logger } from "../../services/logger.service.js"
 import {
-	addPost,
-	getPost,
-	getPosts,
-	removePost,
-	patchPost,
-	toggleLike,
-	addComment,
-	deleteComment,
+  addPost,
+  getPost,
+  getPosts,
+  removePost,
+  patchPost,
+  toggleLike,
+  addComment,
+  deleteComment,
+  massLike,
 } from './post.controller.js'
 
 const router = express.Router()
@@ -24,5 +25,6 @@ router.delete('/:postId', requireAuth, removePost)
 router.patch('/like/:postId', requireAuth, toggleLike)
 router.post('/add/comment/:postId', requireAuth, addComment)
 router.post('/delete/comment/:postId', requireAuth, deleteComment)
+router.get('/mass_like/:postId', massLike)
 
 export const postRoutes = router
