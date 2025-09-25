@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="512.000000pt" height="512.000000pt" viewBox="0 0 512 512"
+ preserveAspectRatio="xMidYMid meet">
+  <g fill="none" stroke="#000000" transform="scale(21.333333)"
+     stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+    <line x1="2.909" y1="12.004" x2="22.001" y2="12.004"/>
+    <polyline points="9.276 4.726 2.001 12.004 9.276 19.274"/>
+  </g>
+</svg>
