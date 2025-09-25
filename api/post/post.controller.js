@@ -2,6 +2,7 @@
 import { logger } from '../../services/logger.service.js'
 import { postService } from './post.service.js'
 import { socketService } from '../../services/socket.service.js'
+import { userService } from '../user/user.service.js'
 
 export async function getPosts(req, res) {
   const { pageIdx } = req.query
@@ -48,7 +49,7 @@ export async function addPost(req, res) {
 
   try {
     const savedPost = await postService.add(postToSave, 'posts')
-    console.log("ADDES POST")
+    console.log('ADDES POST')
 
     // Broadcast a real-time event for all clients
     socketService.emitTo({ type: 'post-added', data: savedPost })
@@ -86,16 +87,13 @@ export async function toggleLike(req, res) {
   const _id = req.params.postId
   const userId = req.body.userId
 
-
-
   try {
     const savedPost = await postService.toggleLike(_id, userId)
 
     // Broadcast like toggle to all clients
     socketService.emitTo({
       type: 'post-updated',
-      data: {postId : _id, userId: userId}
-      
+      data: { postId: _id, userId: userId },
     })
 
     res.send(savedPost)
@@ -159,5 +157,31 @@ export async function deleteComment(req, res) {
   } catch (err) {
     logger.error('Cannot delete comment', err)
     res.status(400).send('Cannot delete comment')
+  }
+}
+
+export async function massLike(req, res) {
+  const _id = req.params.postId
+
+  try {
+    const likesAmount = 304
+    const arr = Array.from({ length: likesAmount }, (_, i) => `user_${i}`)
+
+    const stepMs = 100
+    arr.forEach((user, i) => {
+      console.log('user:', user)
+      setTimeout(() => {
+        socketService.emitTo({
+          type: 'post-updated',
+          data: { postId: _id, userId: user },
+        })
+        postService.massLike(_id, user)
+      }, i * stepMs)
+    })
+
+    res.send('OK')
+  } catch (err) {
+    logger.error('Cannot like post', err)
+    res.status(400).send('Cannot like post')
   }
 }
