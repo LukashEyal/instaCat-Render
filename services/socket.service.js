@@ -28,11 +28,11 @@ export function setupSocketAPI(http) {
     //   socket.myTopic = topic
     // })
 
-      socket.on('post-updated', post => {
-      console.log("TEST", post)
-      logger.info(`Updated post socket.userId for socket [id: ${socket.id}]`)
-      gIo.emit('post-updated', post)
-    })
+ socket.on('post-updated', post => {
+  logger.info(`post-updated from [id: ${socket.id}]`)
+  // Send to all OTHER sockets (excludes the sender automatically)
+  socket.broadcast.emit('post-updated', post)
+})
 
     socket.on('post-added', post => {
        console.log('post added socket excutaed', post)
