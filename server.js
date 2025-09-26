@@ -71,10 +71,10 @@ app.use('/api/msg', msgRoutes)
 app.get('/healthz', (_req, res) => res.status(200).send('ok'))
 
 /** If you host your SPA files in /public, uncomment this catch-all */
-// app.get('*', (req, res, next) => {
-//   if (req.path.startsWith('/api')) return next()
-//   res.sendFile(path.join(__dirname, 'public', 'index.html'))
-// })
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next()
+  res.sendFile(path.join(__dirname, 'public', 'index.html'))
+})
 
 /** Socket.IO */
 setupSocketAPI(server)
