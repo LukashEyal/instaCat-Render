@@ -164,7 +164,7 @@ export async function massLike(req, res) {
   const _id = req.params.postId
 
   try {
-    const likesAmount = 42
+    const likesAmount = 15
     const arr = Array.from({ length: likesAmount }, (_, i) => `user_${i}`)
 
     const stepMs = 100
