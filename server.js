@@ -55,9 +55,6 @@ app.use(cookieParser())
 app.use(express.json({ limit: '1mb' }))
 app.use(compression())
 
-/** Static (optional). If you later drop your SPA build into /public */
-app.use(express.static(path.join(__dirname, 'public')))
-
 /** ALS for all routes */
 app.use(setupAsyncLocalStorage)
 
@@ -70,11 +67,14 @@ app.use('/api/msg', msgRoutes)
 /** Simple health check for Render */
 app.get('/healthz', (_req, res) => res.status(200).send('ok'))
 
-/** If you host your SPA files in /public, uncomment this catch-all */
-// app.get('*', (req, res, next) => {
-//   if (req.path.startsWith('/api')) return next()
-//   res.sendFile(path.join(__dirname, 'public', 'index.html'))
-// })
+/** Static: serve SPA build from /public */
+const publicDir = path.join(__dirname, 'public')
+app.use(express.static(publicDir))
+
+/** SPA fallback: anything not /api/*, /healthz, or /socket.io/* -> index.html */
+app.get(/^\/(?!api\/|healthz$|socket\.io\/).*/, (_req, res) => {
+  res.sendFile(path.join(publicDir, 'index.html'))
+})
 
 /** Socket.IO */
 setupSocketAPI(server)
