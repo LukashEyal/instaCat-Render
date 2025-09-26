@@ -164,16 +164,17 @@ export async function massLike(req, res) {
   const _id = req.params.postId
 
   try {
-    const likesAmount = 304
+    const likesAmount = 42
     const arr = Array.from({ length: likesAmount }, (_, i) => `user_${i}`)
 
     const stepMs = 100
     arr.forEach((user, i) => {
       console.log('user:', user)
       setTimeout(() => {
-        socketService.emitTo({
+        socketService.broadcast({
           type: 'post-updated',
-          data: { postId: _id, userId: user },
+          data: { postId: _id },
+          userId: user,
         })
         postService.massLike(_id, user)
       }, i * stepMs)
