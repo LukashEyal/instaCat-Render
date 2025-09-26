@@ -37,6 +37,7 @@ const allowedOrigins = [
   'http://127.0.0.1:3030',
   'http://localhost:3030',
   'https://instacat-render.onrender.com',
+  'https://instacat-render-0d0r.onrender.com',
 ]
 if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL)
 
