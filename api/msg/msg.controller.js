@@ -16,13 +16,14 @@ export async function getMsgs(req, res) {
 
 export async function sendMsg(req, res) {
   try {
+    console.log("REQ BODY ", req.body)
     const { fromUserId, txt, toUserId } = req.body
  
 
     // Normalize and persist
     const msgToSend = { from: fromUserId, to: toUserId, txt }
     const sentMsg = await msgService.sendMsg(msgToSend) // {_id, from, to, txt, createdAt}
-
+    console.log("BACKEND MSG CONTROLER SENT MSG: ", sentMsg)
     // Real-time to BOTH users using the *saved* doc
     await socketService.emitToUser({
       type: 'chat-add-msg',
@@ -35,7 +36,7 @@ export async function sendMsg(req, res) {
       data: sentMsg,
     })
 
-    console.log("CONTRLER SNT MSG", sentMsg)
+    
     return res.status(201).send(sentMsg)
   } catch (err) {
     logger.error('Cant send Msg', err)

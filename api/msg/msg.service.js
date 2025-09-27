@@ -43,8 +43,10 @@ async function sendMsg(msg) {
       txt: msg.txt,
       createdAt: new Date(),
     }
+    console.log("TO SAVE SERVICE" ,toSave)
 
     const { insertedId } = await collection.insertOne(toSave)
+    console.log("INSTRED ID DB" , insertedId)
     return { _id: insertedId, ...toSave }
   } catch (err) {
     logger.error('cannot add message', err)

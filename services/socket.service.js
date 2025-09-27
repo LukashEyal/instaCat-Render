@@ -44,11 +44,11 @@ export function setupSocketAPI(http) {
 socket.on('chat-send-msg', async (msg) => {
   // EXPECTED msg: { from: '...', to: '...', txt: '...' }
   // 1) persist
-  const sentMsg = await msgService.sendMsg(msg)
+  // const sentMsg = await msgService.sendMsg(msg)
 
   // // 2) notify recipient + sender with the persisted doc
-  // await emitToUser({ type: 'chat-add-msg', data: sentMsg, userId: String(sentMsg.to) })
-  // await emitToUser({ type: 'chat-add-msg', data: sentMsg, userId: String(sentMsg.from) })
+  // await emitToUser({ type: 'chat-add-msg', data: msg, userId: String(msg.to) })
+  await emitToUser({ type: 'chat-add-msg', data: msg, userId: String(msg.from) })
 })
 
     socket.on('user-watch', userId => {
