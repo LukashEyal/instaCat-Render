@@ -160,29 +160,106 @@ export async function deleteComment(req, res) {
   }
 }
 
-export async function massLike(req, res) {
-  const _id = req.params.postId
+// New: likes + comments together
+export async function massReact(req, res) {
+  const _id = req.params.postId;
 
   try {
-    const likesAmount = 15
-    const arr = Array.from({ length: likesAmount }, (_, i) => `user_${i}`)
+    // Same 18 users used on the dog post (NO Idan/Eyal)
+    const defaultUserIds = [
+      "68d86756ddb9742e5cef324c",
+      "68d86770ddb9742e5cef324d",
+      "68d86843ddb9742e5cef3251",
+      "68d86856ddb9742e5cef3252",
+      "68d8686dddb9742e5cef3253",
+      "68d8687fddb9742e5cef3254",
+      "68d86894ddb9742e5cef3255",
+      "68d868a8ddb9742e5cef3256",
+      "68d868beddb9742e5cef3257",
+      "68d868d6ddb9742e5cef3258",
+      "68d868ebddb9742e5cef3259",
+      "68d868ffddb9742e5cef325a",
+      "68d86916ddb9742e5cef325b",
+      "68d86927ddb9742e5cef325c",
+      "68d8693bddb9742e5cef325d",
+      "68d8694cddb9742e5cef325e",
+      "68d8695eddb9742e5cef325f",
+      "68d86af6ddb9742e5cef3263"
+    ];
 
-    const stepMs = 100
-    arr.forEach((user, i) => {
-      console.log('user:', user)
-      setTimeout(() => {
-        socketService.broadcast({
-          type: 'post-updated',
-          data: { postId: _id },
-          userId: user,
-        })
-        postService.massLike(_id, user)
-      }, i * stepMs)
-    })
+    // Optional override: POST body can supply { userIds, phrases }
+    const userIds = Array.isArray(req.body?.userIds) && req.body.userIds.length
+      ? req.body.userIds
+      : defaultUserIds;
 
-    res.send('OK')
+    const phrases = Array.isArray(req.body?.phrases) && req.body.phrases.length
+      ? req.body.phrases
+      : [
+          "how cute",
+          "Amazing",
+          "So fullfy",
+          "adorable 🐾",
+          "too cute 😻",
+          "fluffy overload ✨",
+          "perfection 😺",
+          "LOL 😹",
+          "iconic 🔥",
+          "sweet kitty ❤️",
+          "mood 🙌",
+          "cutie pie 😍",
+          "this made my day 👏",
+          "tiny tiger 🐯",
+          "cuteness overload 💕",
+          "meowdel behavior ✨",
+          "pawfect 🐾",
+          "can’t handle this 😭",
+          "so soft 😍",
+          "heart melted 💖"
+        ];
+
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    const likeStepMs = 100;       // pace likes
+    const commentStepMs = 120;    // pace comments (slightly offset so they interleave)
+
+    userIds.forEach((userId, i) => {
+      // 1) LIKE (addToSet - idempotent)
+      setTimeout(async () => {
+        try {
+          const afterLike = await postService.massLike(_id, userId);
+          socketService.broadcast({
+            type: 'post-updated',
+            data: { postId: _id, event: 'like-added', userId },
+            userId
+          });
+        } catch (err) {
+          logger.warn('massReact like failed', { userId, err });
+        }
+      }, i * likeStepMs);
+
+      // 2) COMMENT (random phrase)
+      setTimeout(async () => {
+        try {
+          const comment = {
+            comment: pick(phrases),
+            userId,
+            createAt: new Date()
+          };
+          const afterComment = await postService.massComment(_id, comment);
+          socketService.broadcast({
+            type: 'post-updated',
+            data: { postId: _id, event: 'comment-added', comment },
+            userId
+          });
+        } catch (err) {
+          logger.warn('massReact comment failed', { userId, err });
+        }
+      }, i * commentStepMs);
+    });
+
+    res.send('OK');
   } catch (err) {
-    logger.error('Cannot like post', err)
-    res.status(400).send('Cannot like post')
+    logger.error('Cannot mass react', err);
+    res.status(400).send('Cannot mass react');
   }
 }

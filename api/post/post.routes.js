@@ -12,7 +12,7 @@ import {
   toggleLike,
   addComment,
   deleteComment,
-  massLike,
+  massReact,
 } from './post.controller.js'
 
 const router = express.Router()
@@ -25,6 +25,6 @@ router.delete('/:postId', requireAuth, removePost)
 router.patch('/like/:postId', requireAuth, toggleLike)
 router.post('/add/comment/:postId', requireAuth, addComment)
 router.post('/delete/comment/:postId', requireAuth, deleteComment)
-router.get('/mass_like/:postId', massLike)
+router.get('/mass_like/:postId', massReact)
 
 export const postRoutes = router

@@ -18,6 +18,7 @@ export const postService = {
   addComment,
   deleteComment,
   massLike,
+  massComment,
 }
 
 async function query(
@@ -242,16 +243,21 @@ async function deleteComment(postComment, dbCollection) {
     throw err
   }
 }
-
 async function massLike(postId, user) {
-  const collection = await dbService.getCollection('posts')
-  const _id = ObjectId.createFromHexString(postId)
+  const collection = await dbService.getCollection('posts');
+  const _id = ObjectId.createFromHexString(postId);
+  const addToSetObj = { $addToSet: { likeBy: user } };
+  const res = await collection.findOneAndUpdate({ _id }, addToSetObj, { returnDocument: 'after' });
+  return res.value;
+}
 
-  const addToSetObj = { $addToSet: { likeBy: user } }
-
-  const res = await collection.findOneAndUpdate({ _id }, addToSetObj, {
-    returnDocument: 'after',
-  })
-
-  return res.value
+async function massComment(postId, commentDoc) {
+  const collection = await dbService.getCollection('posts');
+  const _id = ObjectId.createFromHexString(postId);
+  const res = await collection.findOneAndUpdate(
+    { _id },
+    { $push: { comments: commentDoc } },
+    { returnDocument: 'after' }
+  );
+  return res.value;
 }
